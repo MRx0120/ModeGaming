@@ -1,0 +1,356 @@
+<html>
+  <head>
+    <! - build: PolymerImport ->
+    <link rel = "import" href = "../ polimer / polymer.html">
+    <! - endbuild ->
+
+    <! -
+      Elemen untuk memasukkan tombol Login Facebook ke situs Anda.
+      Setelah memasukkan tombol, objek FB berada pada lingkup global dan
+      dapat digunakan untuk panggilan API.
+      _ Pastikan Anda mengimpor facebook-login.html dari
+      folder dist seperti yang lain ditulis dalam EcmaScript 6._
+
+      Contoh #####
+
+          <html>
+            <head>
+              <meta charset = "utf-8">
+              <meta name = "viewport" content = "width = lebar perangkat, skala minimum = 1.0, skala awal = 1.0, skala pengguna = ya">
+              <title> Demo facebook-login </title>
+              <script src = "../../ webcomponentsjs / webcomponents-lite.js"> </script>
+              <link rel = "import" href = "../ dist / facebook-login.html">
+            </head>
+            <Tubuh tidak terselesaikan>
+
+              <p> Contoh menggunakan <code><facebook-login> </code>: </p>
+
+              <template is = "dom-bind">
+
+                <facebook-login
+                    appID = "743333545708443"
+                    logout-link graph-url = "saya? bidang = nama, email, ulang tahun"
+                    scope = "public_profile email user_birthday"
+                    graph-response = "{{resp}}"
+                    auto-api-call> </facebook-login>
+
+                <div style = "margin-top: 20px">
+                  <span> [[resp.name]] </span>
+                  <div> [[resp.email]] </div>
+                  <div> [[resp.birthday]] </div>
+                </div>
+
+              </template>
+
+            </body>
+          </html>
+
+      @elemen facebook-login
+      @ demo demo / index.html
+      @ pahlawan hero.svg
+      ->
+  </head>
+  <body>
+    <dom-module id = "facebook-login">
+      <template>
+        <style>
+          :tuan rumah {
+          display: inline-block;
+          }
+        </style>
+        <div id = "fb-login-container">
+        </div>
+      </template>
+    </dom-module>
+    <script>
+      'gunakan yang ketat';
+
+      Polimer({
+        adalah: 'facebook-login',
+        properti: {
+
+          / **
+           * Apakah juga akan bertindak sebagai tombol logout.
+           * /
+          logoutLink: {
+            jenis: Boolean,
+            nilai: salah
+          },
+
+          / **
+           * ID aplikasi aplikasi Facebook Anda. Buat satu di https://developers.facebook.com/apps/
+           * /
+          appid: {
+            jenis: String,
+            nilai: ""
+          },
+
+          / **
+           * Bahasa tombol.
+           * /
+          bahasa: {
+            jenis: String,
+            nilai: 'en_US'
+          },
+
+          / **
+           * Apakah Anda ingin mengatur cookie untuk memungkinkan server mengakses sesi.
+           * /
+          Kue kering: {
+            jenis: Boolean,
+            nilai: benar
+          },
+
+          / **
+           * Atribut `version` menentukan versi API FB mana yang harus digunakan. Contoh 'v2.4'.
+           * /
+          Versi: kapan: {
+            jenis: String,
+            nilai: 'v2.5'
+          },
+
+          / **
+           * Ruang lingkup yang ingin Anda akses.
+           * (lihat https://developers.facebook.com/docs/facebook-login/permissions/v2.3). Harus dibatasi ruang.
+           * /
+          ruang lingkup: {
+            jenis: String,
+            nilai: 'basic_info'
+          },
+
+          / **
+           * Ukuran tombol. ['ikon', 'kecil', 'sedang', 'besar', 'xlarge']
+           * /
+          ukuran kancing: {
+            jenis: String,
+            nilai: 'kecil'
+          },
+
+          / **
+           * Apakah akan menampilkan foto teman di bawah tombol.
+           * /
+          teman: {
+            jenis: Boolean,
+            nilai: salah
+          },
+
+          / **
+           * Apakah akan menampilkan foto teman di bawah tombol.
+           * /
+          maxRows: {
+            jenis: String,
+            nilai: '1'
+          },
+
+          / **
+           * URL API Grafik yang ingin Anda akses.
+           * /
+          graphUrl: {
+            jenis: String,
+            nilai: '',
+            pengamat: "_sendAutoApiRequest"
+          },
+
+          / **
+           * Respons yang dikembalikan dari panggilan API.
+           * /
+          graphResponse: {
+            jenis: Objek,
+            nilai: {},
+            beri tahu: true
+          },
+
+          / **
+           * Params dikirim ke Graph API.
+           * /
+          graphParams: {
+            jenis: Objek,
+            nilai: {},
+            pengamat: "_sendAutoApiRequest"
+          },
+
+          / **
+           * Metode HTTP yang digunakan untuk panggilan Graph API.
+           * /
+          graphMethod: {
+            jenis: String,
+            nilai: 'dapatkan'
+          },
+
+          / **
+           * Jika disetel, elemen akan membuat panggilan API otomatis ketika server graphUrl berubah.
+           * /
+          autoApiCall: {
+            jenis: Boolean,
+            nilai: salah
+          },
+
+          _commaDelimittedAppScope: String,
+
+          _ sudah: {
+            jenis: Boolean,
+            nilai: salah
+          },
+
+          _changeListenerEnabled: {
+            jenis: Boolean,
+            nilai: salah
+          },
+
+        },
+
+        / **
+         * Metode 'go' memulai panggilan API ke URL yang ditentukan oleh properti 'graphUrl'.
+         *
+         * @method go
+         * /
+        Pergilah() {
+
+          if (this.graphUrl === '') {
+            console.error ("Tidak ada URL yang ditentukan. Tetapkan URL API grafik menggunakan atribut graphURL.");
+            kembali;
+          }
+
+          if (! this._ready) {
+            console.error ("SDK Facebook belum siap.");
+            kembali;
+          }
+
+          FB.api (this.graphUrl, this.graphMethod, this.graphParams, (respons) => {
+            this.graphResponse = response;
+            this.fire ('respons grafik', {
+              respons: tanggapan
+            });
+          });
+        },
+
+        siap () {
+
+          if (! this.appid) {
+            console.error ("Atribut atribut hilang untuk Tombol Masuk Facebook");
+            kembali;
+          }
+
+          this._commaDelimittedAppScope = this.scope.split ('') .join (',');
+
+          biarkan fbButton = document.createElement ('div');
+          fbButton.className = "fb-login-button";
+          fbButton.setAttribute ("onlogin", "FB.customCheckLoginState ();");
+          fbButton.setAttribute ("data-scope", this._commaDelimittedAppScope);
+          fbButton.setAttribute ("data-size", this.buttonSize);
+          fbButton.setAttribute ("data-max-rows", this.maxRows);
+          fbButton.setAttribute ("data-show-faces", this.friends.toString ());
+          fbButton.setAttribute ("data-auto-logout-link", this.logoutLink.toString ());
+          Polymer.dom (this. $ ['Fb-login-container']). AppendChild (fbButton);
+
+          window.fbAsyncInit = () => {
+            FB.init ({
+              appID: this.appid,
+              cookie: this.cookie,
+              xfbml: true,
+              versi: this.versi
+            });
+
+            FB.getLoginStatus (response => {
+              this._statusChangeCallback (respons);
+            });
+
+            FB.XFBML.parse (this. $ ['Fb-login-container']);
+
+            FB.customCheckLoginState = () => {
+              FB.getLoginStatus (response => {
+                this._statusChangeCallback (respons);
+              });
+            };
+
+            this._ready = true;
+            this.fire ('ready');
+          };
+
+          if (typeof (FB) == 'undefined') {
+            ((d, s, id) => {
+              biarkan js, fjs = d.getElementsByTagName (s) [0];
+              jika (d.getElementById (id)) kembali;
+              js = d.createElement (s);
+              js.id = id;
+              js.src = `//connect.facebook.net / $ {this.language} /sdk.js#xfbml=1&version = $ {this.version} & appId = $ {this.appid}`;
+              fjs.parentNode.insertBefore (js, fjs);
+            }) (dokumen, 'skrip', 'facebook-jssdk');
+          }
+        },
+
+        _statusChangeCallback (respons) {
+          if (response.status === 'tersambung') {
+            // Masuk ke aplikasi dan Facebook.
+            this.fire ('keberhasilan signin', {
+              respons: tanggapan
+            });
+            // Pengguna sudah masuk, kami sekarang dapat memulai panggilan API jika autoApiCall digunakan
+            if (! this._changeListenerEnabled) {
+              this._changeListenerEnabled = true;
+              this.go ();
+            }
+
+          } lain jika (response.status === 'not_authorized') {
+            // Orang tersebut masuk ke Facebook, tetapi tidak ke dalam aplikasi.
+            this.fire ('masuk bukan-berwenang', {
+              respons: tanggapan
+            });
+            this.graphResponse = {};
+            this._changeListenerEnabled = false;
+          } lain {
+            // Orang itu tidak masuk ke Facebook, jadi kami tidak yakin apakah
+            // mereka masuk ke aplikasi ini atau tidak.
+            this.fire ('masuk-bukan-masuk', {
+              respons: tanggapan
+            });
+            this.graphResponse = {};
+            this._changeListenerEnabled = false;
+          }
+        },
+
+        _sendAutoApiRequest () {
+          if (this.autoApiCall && this._changeListenerEnabled) {
+            // Panggilan api otomatis awal dikirim dari panggilan balik masuk.
+            // Hanya yang setelah itu yang harus dikirim dari pengamat
+            this.go ();
+          }
+        }
+
+        / **
+         * Acara `masuk-sukses` dipecat jika ada pengguna
+         * Masuk dengan sukses.
+         *
+         * @ acara sukses-masuk
+         * /
+
+        / **
+         * Acara `masuk-tidak-resmi` dipecat jika a
+         * pengguna masuk ke Facebook tetapi tidak ke aplikasi Anda.
+         *
+         * @Event mendaftar masuk-tidak-diotorisasi
+         * /
+
+        / **
+         * Acara `masuk-tidak-masuk` dipecat jika a
+         * pengguna tidak masuk ke facebook.
+         *
+         * @Event signin-not-login
+         * /
+
+        / **
+         * Peristiwa `graph-response` dipecat segera setelah respons panggilan API masuk.
+         *
+         * @Event grafik-respons
+         * /
+
+        / **
+         * Acara `ready` dipecat segera setelah SDK facebook siap.
+         *
+         * @Event siap
+         * /
+
+      });
+    </script>
+  </body>
+</html>
